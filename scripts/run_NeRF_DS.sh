@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #!/usr/bin/env bash
-scenes=(hellwarrior  hook  jumpingjacks mutant  standup  trex bouncingballs lego)
-gpus=(2 3 4 5 6 7)
+scenes=(as  basin  bell  cup  plate  press  sieve)
+gpus=(1 2 3 4 5 6 7 8 9)
 args=()
 test_args=()
 num_scenes=${#scenes[@]}
@@ -18,7 +18,7 @@ do
     fi
     screen -S ${gpu_id} -p 0 -X stuff "^M"
     screen -S ${gpu_id} -p 0 -X stuff "export CUDA_VISIBLE_DEVICES=${gpus[$i]}^M"
-    screen -S ${gpu_id} -p 0 -X stuff "cd ~/wan_code/NeRF^M"
+    screen -S ${gpu_id} -p 0 -X stuff "cd ~/Projects/NeRF/SC-GS^M"
 done
 screen -ls%
 
@@ -29,9 +29,19 @@ do
     screen -S gpu${gpu_id} -p 0 -X stuff "^M"
     screen -S gpu${gpu_id} -p 0 -X stuff \
       "python3 train_gui.py \
-        --source_path ~/data/DNeRF/${scenes[i]} --model_path outputs/jumpingjacks \
+        --source_path ~/data/NeRF/NeRF_DS/${scenes[i]} --model_path outputs/NeRF_DS/${scenes[i]} \
         --deform_type node --node_num 512 --is_blender --eval \
         --gt_alpha_mask_as_scene_mask --local_frame \
-        --resolution 2 --W 800 --H 800 \
+        --W 480 --H 270 \
         ${args[*]} ^M"
+    screen -S gpu${gpu_id} -p 0 -X stuff \
+      "python3 render.py \
+        --source_path ~/data/NeRF/NeRF_DS/${scenes[i]} --model_path outputs/NeRF_DS/${scenes[i]} \
+        --deform_type node --node_num 512 --is_blender --eval \
+        --gt_alpha_mask_as_scene_mask --local_frame \
+        --W 480 --H 270 --skip_train \
+        ${args[*]} ${test_args[*]} ^M"
+
+    screen -S gpu${gpu_id} -p 0 -X stuff \
+      "python3 metrics.py -m outputs/NeRF_DS/${scenes[i]}_node ^M"
 done
