@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-scenes=(hellwarrior  hook  jumpingjacks mutant  standup trex lego)
-gpus=(1 2 3 4 5 6 8 9)
-#args=(--resolution 2)
-#out_dir=DNeRF_400
-args=()
-out_dir=DNeRF
+scenes=(hellwarrior hook jumpingjacks mutant standup trex bouncingballs lego)
+gpus=(0 1 2 3 4 5 6 7)
+args=(--resolution 2)
+out_dir=DNeRF_400
+#args=()
+#out_dir=DNeRF
 test_args=()
 num_scenes=${#scenes[@]}
 num_gpus=${#gpus[@]}

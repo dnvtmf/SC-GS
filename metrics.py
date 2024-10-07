@@ -9,20 +9,21 @@
 # For inquiries contact  george.drettakis@inria.fr
 #
 
-from pathlib import Path
+import json
 import os
-from PIL import Image
+from argparse import ArgumentParser
+from pathlib import Path
+
+# from lpipsPyTorch import lpips
+import lpips
 import torch
 import torchvision.transforms.functional as tf
-from utils.loss_utils import ssim as ssim_fn
-from lpipsPyTorch import lpips
-# import lpips
-import json
-from tqdm import tqdm
-from utils.image_utils import psnr as psnr_fn
-from argparse import ArgumentParser
-
+from PIL import Image
 from torchmetrics.functional.image.ssim import multiscale_structural_similarity_index_measure as ms_ssim_fn
+from tqdm import tqdm
+
+from utils.image_utils import psnr as psnr_fn
+from utils.loss_utils import ssim as ssim_fn
 
 
 def readImages(renders_dir, gt_dir):
@@ -30,6 +31,8 @@ def readImages(renders_dir, gt_dir):
     gts = []
     image_names = []
     for fname in os.listdir(renders_dir):
+        if not (fname.endswith('.png') or fname.endswith('.jpg')):
+            continue
         render = Image.open(renders_dir / fname)
         gt = Image.open(gt_dir / fname)
         renders.append(tf.to_tensor(render).unsqueeze(0)[:, :3, :, :].cuda())
@@ -38,6 +41,7 @@ def readImages(renders_dir, gt_dir):
     return renders, gts, image_names
 
 
+@torch.no_grad()
 def evaluate(model_paths):
     full_dict = {}
     per_view_dict = {}
@@ -109,8 +113,8 @@ def evaluate(model_paths):
                 json.dump(full_dict[scene_dir], fp, indent=True)
             with open(scene_dir + "/per_view.json", 'w') as fp:
                 json.dump(per_view_dict[scene_dir], fp, indent=True)
-        except:
-            print("Unable to compute metrics for model", scene_dir)
+        except Exception as e:
+            print("Unable to compute metrics for model", scene_dir, e)
 
 
 if __name__ == "__main__":

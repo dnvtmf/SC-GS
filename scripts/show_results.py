@@ -1,7 +1,7 @@
 import json
 import os
 from pathlib import Path
-import rich
+
 from rich.console import Console
 from rich.table import Table
 
@@ -9,6 +9,8 @@ console = Console()
 root = Path(__file__).parent.parent
 datsets = list(root.joinpath('outputs').iterdir())
 for db in datsets:
+    if not db.is_dir():
+        continue
     table = Table(title=f"Results for {db.name}")
     table.add_column()
     scenes = sorted(os.listdir(db))
@@ -17,8 +19,18 @@ for db in datsets:
         if db.joinpath(scene, 'results.json').exists():
             with open(db.joinpath(scene, 'results.json'), 'r') as f:
                 res = json.load(f)
-                last_iter = max(int(k.split('_')[1]) for k in res.keys())
-                results.append(res[f"ours_{last_iter}"])
+                last_iter = -1
+                last_key = ''
+                for k in res.keys():
+                    step = k.split('_')[1]
+                    try:
+                        step = int(k)
+                    except:
+                        step = 0
+                    if last_iter < step:
+                        last_iter = step
+                        last_key = k
+                results.append(res[last_key])
         else:
             results.append({})
         if db.joinpath(scene, 'speed/results.txt').exists():

@@ -9,12 +9,16 @@
 # For inquiries contact  george.drettakis@inria.fr
 #
 
-import torch
 import math
+import sys
+from pathlib import Path
+
+import torch
+
+sys.path.insert(0, Path(__file__).parent.parent.joinpath('submodules/diff-gaussian-rasterization').as_posix())
 from diff_gaussian_rasterization import GaussianRasterizationSettings, GaussianRasterizer
 from scene.gaussian_model import GaussianModel
 from utils.sh_utils import eval_sh
-from utils.rigid_utils import from_homogenous, to_homogenous
 
 
 # def quaternion_multiply(q1, q2):

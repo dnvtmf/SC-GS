@@ -1,11 +1,10 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from utils.time_utils import DeformNetwork, ControlNodeWarp, StaticNetwork
 import os
-from utils.system_utils import searchForMaxIteration
-from utils.general_utils import get_expon_lr_func
 
+import torch
+
+from utils.general_utils import get_expon_lr_func
+from utils.system_utils import searchForMaxIteration
+from utils.time_utils import DeformNetwork, ControlNodeWarp, StaticNetwork
 
 model_dict = {'mlp': DeformNetwork, 'node': ControlNodeWarp, 'static': StaticNetwork}
 
@@ -34,7 +33,12 @@ class DeformModel:
         ]
         self.optimizer = torch.optim.Adam(l, lr=0.0, eps=1e-15)
 
-        self.deform_scheduler_args = get_expon_lr_func(lr_init=training_args.position_lr_init * self.spatial_lr_scale * training_args.deform_lr_scale, lr_final=training_args.position_lr_final * training_args.deform_lr_scale, lr_delay_mult=training_args.position_lr_delay_mult, max_steps=training_args.deform_lr_max_steps)
+        self.deform_scheduler_args = get_expon_lr_func(
+            lr_init=training_args.position_lr_init * self.spatial_lr_scale * training_args.deform_lr_scale,
+            lr_final=training_args.position_lr_final * training_args.deform_lr_scale,
+            lr_delay_mult=training_args.position_lr_delay_mult,
+            max_steps=training_args.deform_lr_max_steps
+        )
         if self.name == 'node':
             self.deform.as_gaussians.training_setup(training_args)
 
